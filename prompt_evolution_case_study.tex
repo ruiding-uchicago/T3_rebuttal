@@ -1,0 +1,32 @@
+\section{Prompt Evolution}
+\label{sec:prompt-evolution}
+
+This appendix presents the human-authored initial prompts alongside their autonomously optimized counterparts for all five field categories: the core fields (8 fields) and four extended field groups. For the four extended field groups, we embed the representative top-performing prompts (M8, inference=Deepseek-70B, critique=GPT-oss-120B). Across these prompts, the optimizer generally learned to: (i) tightly scope the extraction window to the main article while ignoring cited abstracts/supplementary fluff; (ii) normalize units and apply explicit defaults (thickness/time/concentration) instead of heuristic guessing; (iii) disambiguate primary device elements from auxiliary layers (e.g., gate dielectric vs. encapsulation vs. reference electrode); (iv) collapse multiple material or device variants into a single representative record when the paper only tweaks minor formulations; (v) extract numeric values directly with required conversions (e.g., pH$\rightarrow$[H$^+$], ppm from P/P$_v$, seconds from minutes); and (vi) forbid inference---fields remain "" unless explicitly stated. These behaviors collectively reduce hallucination, enforce consistency, and preserve the most representative device configuration per paper.
+
+Concrete improvements observed across the five prompt families include: (1) \textit{Scope control}---original prompts often swept in cited abstracts or supplementary blurbs; optimized prompts now restrict extraction to the main article body (and, when needed, a specified table or subsection). (2) \textit{Unit rigor}---where initial prompts left units free-form, optimized prompts demand explicit conversions (e.g., minutes$\rightarrow$seconds for response/recovery times; P/P$_v$$\rightarrow$ppm; pH$\rightarrow$[H$^+$] for bounds) or defaults when absent. (3) \textit{Device disentangling}---early instructions blurred substrate/dielectric/encapsulation; optimized prompts explicitly separate gate dielectric from protective coatings and require empty strings when not stated. (4) \textit{Variant consolidation}---initial versions invited multiple records for minor material tweaks; optimized prompts collapse variants into a single representative record unless the paper truly reports distinct devices. (5) \textit{Field-specific cues}---material-layer prompts add dopant handling and thickness defaults; sensitivity/response prompts require table parsing and unit rounding; synthesis/thermal prompts stress atmosphere/time/temperature capture while ignoring non-functional processing layers. Collectively, these edits yield cleaner, reproducible JSON with fewer missing-unit errors and no fabricated values.
+
+Table~\ref{tab:extraction_fields} summarizes the 28 extraction fields organized into five prompt categories.
+
+\begin{table*}[htbp]
+\centering
+\caption{Summary of LLM extraction fields by prompt category. A total of 28 fields are extracted across five prompt families.}
+\label{tab:extraction_fields}
+\small
+\begin{tabular}{lcp{12cm}}
+\toprule
+\textbf{Category} & \textbf{Fields} & \textbf{Field Names} \\
+\midrule
+Core & 8 & sensor\_type, detect\_target, lower\_detection\_limit, upper\_detection\_limit, probe\_material, test\_operating\_temperature, pH\_value, test\_medium \\
+\addlinespace
+Electrode Architecture & 4 & gate, source, drain, structure\_design\_type \\
+\addlinespace
+Material Layer & 7 & substrate, substrate\_thickness, channel, dielectric\_layer, dielectric\_layer\_thickness, surface\_functionalization, structure\_dimensionality \\
+\addlinespace
+Sensitivity/Response & 4 & response\_time, recovery\_time, sensitivity\_numerator, sensitivity\_denominator \\
+\addlinespace
+Synthesis/Thermal & 5 & annealing\_temperature, annealing\_time, annealing\_atmosphere, hydrothermal\_temperature, hydrothermal\_time \\
+\midrule
+\textbf{Total} & \textbf{28} & \\
+\bottomrule
+\end{tabular}
+\end{table*}
